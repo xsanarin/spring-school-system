@@ -11,7 +11,7 @@ Bu proje, Java Spring Boot kullanılarak geliştirilmiş bir **backend uygulamas
 - RESTful API mimarisi
 - E-posta ile kayıt/başvuru onayı (opsiyonel)
 
-## 🛠 Kullanılan Teknolojiler
+##  Kullanılan Teknolojiler
 
 - Java 17
 - Spring Boot
