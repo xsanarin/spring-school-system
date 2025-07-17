@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Öğrenci Yönetimi</title>
+</head>
+<body>
+<h1>🎓 Öğrenci Yönetim Paneli</h1>
+
+<h2>📋 Tüm Öğrenciler</h2>
+<button onclick="getAll()">Listele</button>
+<ul id="liste"></ul>
+
+<h2>🔍 ID ile Öğrenci Getir</h2>
+<input type="number" id="getIdInput" placeholder="Öğrenci ID">
+<button onclick="getById()">Göster</button>
+<p id="getResult"></p>
+
+<h2>➕ Yeni Öğrenci Ekle</h2>
+<input id="adInput" placeholder="Ad">
+<input id="soyadInput" placeholder="Soyad">
+<input id="durumInput" placeholder="Durum">
+<button onclick="addOgrenci()">Ekle</button>
+
+<h2>❌ Öğrenci Sil (ID ile)</h2>
+<input type="number" id="deleteIdInput" placeholder="Silinecek ID">
+<button onclick="deleteById()">Sil</button>
+
+<h2>✏️ Öğrenci Güncelle (ID ile)</h2>
+<input type="number" id="updateIdInput" placeholder="Güncellenecek ID">
+<input id="updateAd" placeholder="Yeni Ad">
+<input id="updateSoyad" placeholder="Yeni Soyad">
+<input id="updateDurum" placeholder="Yeni Durum">
+<button onclick="updateOgrenci()">Güncelle</button>
+
+<script>
+    const baseUrl = "http://localhost:8080/rest/api/ogrenci";
+
+    function getAll() {
+        fetch(`${baseUrl}/list`)
+            .then(res => res.json())
+            .then(data => {
+                const ul = document.getElementById("liste");
+                ul.innerHTML = "";
+                data.forEach(o => {
+                    const li = document.createElement("li");
+                    li.textContent = `${o.ogrenci_id} - ${o.ogrenci_ad} ${o.ogrenci_soyad} (${o.durum})`;
+                    ul.appendChild(li);
+                });
+            });
+    }
+
+    function getById() {
+        const id = document.getElementById("getIdInput").value;
+        fetch(`${baseUrl}/list/${id}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Bulunamadı");
+                return res.json();
+            })
+            .then(o => {
+                document.getElementById("getResult").textContent =
+                    `${o.ogrenci_id}: ${o.ogrenci_ad} ${o.ogrenci_soyad} (${o.durum})`;
+            })
+            .catch(() => {
+                document.getElementById("getResult").textContent = "Öğrenci bulunamadı.";
+            });
+    }
+
+    function ekle() {
+        const ad = document.getElementById("ad").value;
+        const soyad = document.getElementById("soyad").value;
+        const durum = document.getElementById("durum").value;
+
+        fetch("http://localhost:8080/rest/api/ogrenci/save", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ogrenci_ad: ad,
+                ogrenci_soyad: soyad,
+                durum: durum
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                alert("Öğrenci eklendi: " + data.ogrenci_id);
+            })
+            .catch(err => {
+                console.error("Hata:", err);
+            });
+    }
+    function deleteById() {
+        const id = document.getElementById("deleteIdInput").value;
+        fetch(`${baseUrl}/delete/${id}`, { method: "DELETE" })
+            .then(() => {
+                alert("Öğrenci silindi.");
+                getAll();
+            });
+    }
+
+    function updateOgrenci() {
+        const id = document.getElementById("updateIdInput").value;
+        const ad = document.getElementById("updateAd").value;
+        const soyad = document.getElementById("updateSoyad").value;
+        const durum = document.getElementById("updateDurum").value;
+
+        fetch(`${baseUrl}/update/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ogrenci_ad: ad,
+                ogrenci_soyad: soyad,
+                durum: durum
+            })
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Güncelleme başarısız.");
+                }
+                return res.json();
+            })
+            .then(() => {
+                alert("Öğrenci güncellendi.");
+                getAll();
+            })
+            .catch(() => alert("Güncelleme sırasında hata oluştu."));
+    }
+</script>
+</body>
+</html>
